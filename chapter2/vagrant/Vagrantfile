@@ -1,0 +1,61 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+_post_up = <<-SCRIPT
+#!/bin/sh -x
+for nic in "eth0" "eth1"
+do
+    conn_name=$(nmcli dev show $nic | awk -F: '/^GENERAL.CONNECTION:/ { print $2 }' | sed 's/ *//')
+    nmcli con mod "$conn_name" connection.id $nic
+done
+nmcli con mod eth1 ipv4.address $1/$2
+nmcli con mod eth1 ipv4.method manual
+systemctl restart NetworkManager
+
+dnf groupinstall -y "Development Tools"
+dnf install -y mlocate podman python3-devel python3-pip sshpass tree libssh-devel
+
+pip3 install --user ansible-core
+ansible-playbook /opt/env/playbook.yml
+
+for user in "ansible" "vagrant"
+do
+  sudo -i -u $user pip3 install --user -r /opt/env/bootstrap/requirements.txt
+done
+
+SCRIPT
+
+_pre_destroy = <<-SCRIPT
+SCRIPT
+
+Vagrant.configure("2") do |config|
+  config.vm.define "ansible" do |ansible|
+    IPADDR = "192.168.57.3"
+    PREFIX = "24"
+    VBOXNET = "vboxnet1"
+    ansible.vm.box = "fedora/39-cloud-base"
+    ansible.vm.hostname = "ansible.example.com"
+    ansible.vm.network "private_network", \
+                        ip: IPADDR, \
+                        netmask: PREFIX, \
+                        virtualbox_innet: VBOXNET, \
+                        auto_config: false
+    ansible.vm.provider "virtualbox" do |vb|
+      vb.memory = "2048"
+      vb.gui = false
+      vb.cpus = 1
+    end
+    ansible.vm.synced_folder "./env", "/opt/env", owner: "root", group: "root"
+    ansible.vm.synced_folder "../../", "/home/vagrant/ansible-labs", owner: "vagrant", group: "vagrant"
+
+    ansible.trigger.after :up do |trigger|
+      trigger.run_remote = {
+        inline: _post_up,
+        args: [IPADDR,PREFIX]
+      }
+    end
+    ansible.trigger.before :destroy do |trigger|
+      trigger.run_remote = {inline: _pre_destroy}
+    end
+  end
+end

@@ -1,0 +1,6 @@
+ansible==9.3.0
+ansible-builder==3.0.1
+ansible-navigator==24.2.0
+ansible-runner==2.3.5
+ansible-pylibssh==1.1.0
+paramiko==3.4.0
