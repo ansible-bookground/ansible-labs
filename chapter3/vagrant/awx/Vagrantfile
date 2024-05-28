@@ -1,0 +1,45 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+_post_up = <<-SCRIPT
+#!/bin/sh -x
+sudo subscription-manager register \
+--username=#{ENV["RHN_USERNAME"]} \
+--password=#{ENV["RHN_PASSWORD"]} \
+--auto-attach
+
+curl -LO "https://dl.k8s.io/release/$(curl -LS https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+sudo install -m 0755 kubectl /usr/local/bin/
+sudo dnf install -y git podman mlocate
+
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-latest.x86_64.rpm
+sudo rpm -Uvh minikube-latest.x86_64.rpm
+
+sudo systemctl disable --now firewalld
+SCRIPT
+
+_pre_destroy = <<-SCRIPT
+sudo subscription-manager unregister
+SCRIPT
+
+Vagrant.configure("2") do |config|
+  config.vm.define "awx" do |awx|
+    awx.vm.box = "generic/rhel9"
+    awx.vm.hostname = "awx.vbox.fgrep.org"
+    awx.vm.network "public_network"
+    awx.vm.network "private_network", ip: "192.168.57.4", netmask: "255.255.255.0", virtualbox_innet: "vboxnet1"
+    awx.vm.provider "virtualbox" do |vb|
+      vb.memory = "8192"
+      vb.gui = false
+      vb.cpus = 4
+    end
+    awx.vm.synced_folder "./work", "/home/vagrant/work", owner: "vagrant", group: "vagrant"
+
+    awx.trigger.after :up do |trigger|
+      trigger.run_remote = {inline: _post_up}
+    end
+    awx.trigger.before :destroy do |trigger|
+      trigger.run_remote = {inline: _pre_destroy}
+    end
+  end
+end

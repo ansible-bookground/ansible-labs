@@ -1,0 +1,15 @@
+host_settings:
+  - option: name
+    value: localhost
+  - option: port
+    value: 5321
+  - option: comment
+    value: This is an imaginary app setting for its host.
+
+role_settings:
+  - option: name
+    value: cleaners
+  - option: action
+    value: clean up things
+  - option: comment
+    value: Cleaners love to clean things.

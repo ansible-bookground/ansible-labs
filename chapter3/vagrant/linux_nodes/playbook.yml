@@ -1,0 +1,40 @@
+---
+- name: Bootstrap playbook for virtual-machie
+  hosts: all
+  gather_facts: true
+
+  vars:
+    username: "{{ lookup('ansible.builtin.env', 'VBOX_USERNAME', default='ansible') }}"
+    password: "{{ lookup('ansible.builtin.env', 'VBOX_PASSWORD') }}"
+
+  tasks:
+    - name: Create VBOX_USERNAME group
+      ansible.builtin.group:
+        name: "{{ username }}"
+      become: true
+
+    - name: Create VBOX_USERNAME user
+      ansible.builtin.user:
+        name: "{{ username }}"
+        password: "{{ password | ansible.builtin.password_hash('sha512', inventory_hostname) }}"
+        append: true
+        groups:
+          - "{{ username }}"
+          - wheel
+      become: true
+
+    - name: Enable PasswordAuthentication in sshd_config
+      ansible.builtin.lineinfile:
+        path: "/etc/ssh/sshd_config"
+        regexp: "^PasswordAuthentication no$"
+        state: absent
+      become: true
+      notify:
+        - "Restart sshd service"
+
+  handlers:
+    - name: Restart sshd service
+      ansible.builtin.service:
+        name: sshd
+        state: restarted
+      become: true

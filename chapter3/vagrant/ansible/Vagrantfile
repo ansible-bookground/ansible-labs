@@ -1,0 +1,45 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+_post_up = <<-SCRIPT
+#!/bin/sh -x
+subscription-manager status ||  subscription-manager register \
+--username=#{ENV["RHN_USERNAME"]} \
+--password=#{ENV["RHN_PASSWORD"]} \
+--auto-attach
+subscription-manager repos --enable ansible-automation-platform-2.4-for-rhel-9-x86_64-rpms
+dnf install -y ansible-core ansible-navigator podman
+SCRIPT
+
+_pre_destroy = <<-SCRIPT
+subscription-manager unregister
+SCRIPT
+
+Vagrant.configure("2") do |config|
+  config.vm.define "ansible" do |ansible|
+    ansible.vm.box = "generic/rhel9"
+    ansible.vm.hostname = "ansible.example.com"
+    ansible.vm.network "private_network", \
+                        ip: "192.168.57.3", \
+                        netmask: "255.255.255.0", \
+                        virtualbox_innet: "vboxnet1"
+    ansible.vm.provider "virtualbox" do |vb|
+      vb.memory = "2048"
+      vb.gui = false
+      vb.cpus = 1
+    end
+    ansible.vm.synced_folder "./work", "/home/vagrant/work", owner: "vagrant", group: "vagrant"
+
+    ansible.trigger.after :up do |trigger|
+      trigger.run_remote = {inline: _post_up}
+    end
+    ansible.trigger.before :destroy do |trigger|
+      trigger.run_remote = {inline: _pre_destroy}
+    end
+
+    ansible.vm.provision "ansible" do |ansible|
+      ansible.verbose = "v"
+      ansible.playbook = "playbook.yml"
+    end
+  end
+end

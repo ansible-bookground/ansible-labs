@@ -1,0 +1,5 @@
+- name: Example playbook with fixed indentation
+  hosts: all
+  tasks:
+    - name: Ping all hosts
+      ansible.builtin.ping:

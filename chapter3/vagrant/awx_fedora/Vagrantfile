@@ -1,0 +1,64 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+_post_up = <<-SCRIPT
+#!/bin/sh -x
+for nic in "eth0" "eth1"
+do
+    conn_name=$(nmcli dev show $nic | awk -F: '/^GENERAL.CONNECTION:/ { print $2 }' | sed 's/ *//')
+    nmcli con mod "$conn_name" connection.id $nic
+done
+nmcli con mod eth1 ipv4.address $1/$2
+nmcli con mod eth1 ipv4.method manual
+systemctl restart NetworkManager
+
+dnf install -y git podman mlocate
+
+which kubectl
+if [ "$?" -ne 0 ]; then
+  curl -LO "https://dl.k8s.io/release/$(curl -LS https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+  install -m 0755 kubectl /usr/local/bin/
+fi
+which minikube
+if [ "$?" -ne 0 ]; then
+  curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-latest.x86_64.rpm
+  rpm -Uvh minikube-latest.x86_64.rpm
+fi
+SCRIPT
+
+_pre_destroy = <<-SCRIPT
+SCRIPT
+
+Vagrant.configure("2") do |config|
+    IPADDR = "192.168.57.4"
+    PREFIX = "24"
+    VBOXNET = "vboxnet1"
+    config.vm.define "awx" do |awx|
+        awx.vm.box = "fedora/39-cloud-base"
+        awx.vm.hostname = "awx.example.com"
+        awx.vm.network "private_network", \
+                            ip: IPADDR, \
+                            netmask: PREFIX, \
+                            virtualbox_innet: VBOXNET, \
+                            auto_config: false
+        awx.vm.provider "virtualbox" do |vb|
+            vb.memory = "8192"
+            vb.gui = false
+            vb.cpus = 4
+        end
+        awx.vm.synced_folder "./work", "/home/vagrant/work", owner: "vagrant", group: "vagrant"
+        awx.trigger.after :up do |trigger|
+            trigger.run_remote = {
+                inline: _post_up,
+                args: [IPADDR,PREFIX]
+            }
+        end
+        awx.trigger.before :destroy do |trigger|
+            trigger.run_remote = {inline: _pre_destroy}
+        end
+        awx.vm.provision "ansible" do |ansible|
+            ansible.verbose = "v"
+            ansible.playbook = "playbook.yml"
+        end
+    end
+end

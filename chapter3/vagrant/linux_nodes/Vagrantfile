@@ -1,0 +1,44 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+_post_up = <<-SCRIPT
+sudo subscription-manager register \
+--username=#{ENV["RHN_USERNAME"]} \
+--password=#{ENV["RHN_PASSWORD"]} \
+--auto-attach
+SCRIPT
+
+_pre_destroy = <<-SCRIPT
+sudo subscription-manager unregister
+SCRIPT
+
+Vagrant.configure("2") do |config|
+  MAX_VM = 3
+  (0 ... MAX_VM).each do |index|
+    config.vm.define sprintf("node%02d", "#{index}") do |ansible|
+      ansible.vm.box = "generic/rhel9"
+      ansible.vm.hostname = sprintf("node%02d.example.com", "#{index}")
+      ansible.vm.network "private_network", \
+                          ip: "192.168.57.#{index + 10}", \
+                          netmask: "255.255.255.0", \
+                          virtualbox_innet: "vboxnet1"
+      ansible.vm.provider "virtualbox" do |vb|
+        vb.memory = "512"
+        vb.gui = false
+        vb.cpus = 1
+      end
+
+      ansible.trigger.after :up do |trigger|
+        trigger.run_remote = {inline: _post_up}
+      end
+      ansible.trigger.before :destroy do |trigger|
+        trigger.run_remote = {inline: _pre_destroy}
+      end
+
+      ansible.vm.provision "ansible" do |ansible|
+        ansible.verbose = "v"
+        ansible.playbook = "playbook.yml"
+      end
+    end
+  end
+end

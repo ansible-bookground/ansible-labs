@@ -1,0 +1,23 @@
+---
+- name: Create sample INI file on nodes
+  hosts: node00.example.com,node01.example.com
+  vars_files:
+    - sample_ini_settings.yml
+  tasks:
+    - name: Ensure host settings are present in sample.ini
+      community.general.ini_file:
+        path: /home/ansible/sample.ini
+        section: host
+        option: "{{ item.option }}"
+        value: "{{ item.value }}"
+        mode: '0644'
+      loop: "{{ host_settings }}"
+
+    - name: Ensure role settings are present in sample.ini
+      community.general.ini_file:
+        path: /home/ansible/sample.ini
+        section: role
+        option: "{{ item.option }}"
+        value: "{{ item.value }}"
+        mode: '0644'
+      loop: "{{ role_settings }}"
