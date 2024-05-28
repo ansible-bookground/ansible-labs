@@ -1,0 +1,24 @@
+---
+version: 3 #...(1)
+build_arg_defaults: #...(2)
+  ANSIBLE_GALAXY_CLI_COLLECTION_OPTS: "-v"
+
+dependencies: #...(3)
+  galaxy: requirements.yml
+  python: requirements.txt
+  system: bindep.txt
+
+images: #...(4)
+  base_image:
+    name: ghcr.io/ansible/creator-ee:latest
+
+additional_build_steps: #...(5)
+  prepend_final: |
+    RUN whoami
+  append_final:
+    - RUN echo This is a post-install command!
+    - RUN cat /etc/os-release
+
+options: #...(6)
+  package_manager_path: /usr/bin/microdnf
+  user: root

@@ -1,0 +1,35 @@
+---
+- name: Install Apache #...(1)
+  dnf:
+    name: httpd
+    state: present
+
+- name: Start Apache service #...(2)
+  systemd:
+    name: httpd
+    enabled: yes
+    state: started
+
+- name: Install firewalld #...(3)
+  dnf:
+    name: firewalld
+    state: present
+
+- name: Start firewalld service #...(4)
+  systemd:
+    name: firewalld
+    enabled: yes
+    state: started
+
+- name: Permit HTTP #...(5)
+  ansible.posix.firewalld:
+    service: http
+    permanent: yes
+    state: enabled
+    immediate: yes
+
+- name: Create a Hello World page #...(6)
+  template:
+    src: web_content.j2
+    dest: /var/www/html/index.html
+

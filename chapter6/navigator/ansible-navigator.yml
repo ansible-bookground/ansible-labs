@@ -1,0 +1,16 @@
+---
+ansible-navigator:
+  execution-environment: #...(1)
+    container-engine: podman
+    enabled: True
+    image: ghcr.io/ansible/creator-ee:latest
+    pull:
+      policy: missing
+  logging: #...(2)
+    append: true
+  file: ./logs/ansible-navigator.log
+  level: debug
+mode: interactive #...(3)
+playbook-artifact: #...(4)
+  enable: true
+  save-as: ./artifact-dir

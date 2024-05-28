@@ -1,0 +1,3 @@
+---
+nodes: development
+SERVER_MESSAGE: "happy automation!"

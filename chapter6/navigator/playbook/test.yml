@@ -1,0 +1,5 @@
+---
+- name: Sample playbook for Ansible Navigator
+  hosts: node00.example.com #...第3章で利用したマネージドノード
+  tasks:
+    - ping:

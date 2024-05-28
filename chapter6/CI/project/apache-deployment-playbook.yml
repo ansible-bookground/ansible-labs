@@ -1,0 +1,5 @@
+---
+- hosts: "{{ nodes }}"
+  tasks:
+  - ansible.builtin.include_role:
+      name: testrole
