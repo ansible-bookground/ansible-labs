@@ -1,2 +1,11 @@
-# ansible-labs
-Lab environment files for Ansible book
+# 『インフラの構成管理と自動化のための実践Ansible』 GitHub
+
+## 概要
+本リポジトリには、秀和システム『*インフラの構成管理と自動化のための実践Ansible*』のPlaybookや検証環境作成のためのVagrantfileが配置されています。本リポジトリをPullもしくはZip形式で直接ダウンロードいただき、お手持ちのWindowsマシン等でお試しください。
+なお、本リポジトリに含まれるPlaybook等は本書籍の検証目的のみでお使いください。本コードを本番環境などでそのまま利用することは想定されておりませんので、ご了承ください。
+
+## 構成
+
+- chapter2〜7: 各章の検証環境のディレクトリです。章ごとに含まれるVagrantfileやPlaybookが異なりますのでご注意ください。
+  - vagrant: Vagrantによる仮想マシン作成で使用するVagrantfileが含まれます。
+    
