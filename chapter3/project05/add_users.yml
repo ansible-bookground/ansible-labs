@@ -1,0 +1,15 @@
+---
+- name: Add users with encrypted passwords
+  hosts: all
+  vars_files:
+    - user_passwords.yml
+    - user_info.yml
+
+  tasks:
+    - name: Ensure those users with protected passwords in user_info exist
+      ansible.builtin.user:
+        name: "{{ item.name }}"
+        password: "{{ item.pass | password_hash('sha512') }}"
+        state: present
+      become: true
+      loop: "{{ users }}"

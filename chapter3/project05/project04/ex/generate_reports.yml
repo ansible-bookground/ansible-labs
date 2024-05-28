@@ -1,0 +1,30 @@
+---
+- name: Install applications and generate server status reports
+  hosts: all
+  tasks:
+    - name: Ensure SMB is on file servers
+      package:
+        name: samba
+        state: present
+      become: true
+      when: inventory_hostname in groups['file_servers']
+
+    - name: Ensure HTTPd is on web servers
+      package:
+        name: httpd
+        state: present
+      become: true
+      when: inventory_hostname in groups['web_servers']
+
+    - name: Ensure PostgreSQL is on data center servers
+      package:
+        name: postgresql-server
+        state: present
+      become: true
+      when: inventory_hostname in groups['data_center']
+
+    - name: Generate status report for each server
+      template:
+        src: custom_status_report.j2
+        dest: "/tmp/{{ ansible_hostname }}_status_report.txt"
+      delegate_to: localhost

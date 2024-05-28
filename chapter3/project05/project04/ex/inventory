@@ -1,0 +1,8 @@
+[file_servers]
+node00.example.com server_role=file_server
+
+[web_servers]
+node01.example.com server_role=web_server
+
+[data_center]
+node02.example.com server_role=data_center

@@ -1,0 +1,20 @@
+---
+- name: 
+  hosts: node00.example.com 
+  vars:
+    users:
+      - name: "hiroshi"
+        role: "admin"
+      - name: "kento"
+        role: "engineer"
+      - name: "lisa"
+        role: "engineer"
+      - name: "helen"
+        role: "tam"
+      - name: "minli"
+        role: "user"
+  tasks:
+    - name: A loop test
+      template:
+        src: users.j2
+        dest: "{{ ansible_env.HOME }}/loop_example.txt"

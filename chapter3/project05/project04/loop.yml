@@ -1,0 +1,16 @@
+---
+- name: Adding multiple users based on OS Family
+  hosts: all
+  vars:
+    usernames:
+      - hiroshi
+      - kento
+      - lisa
+
+  tasks:
+    - name: Add a user with a postfix on Fedora
+      user:
+        name: "{{ item }}_fed"
+        state: present
+      loop: "{{ usernames }}"
+      when: ansible_facts['os_family'] == "RedHat"

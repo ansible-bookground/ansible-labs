@@ -1,0 +1,26 @@
+# Server Status Report
+## Hostname: {{ ansible_hostname }}
+## Role: {{ server_role }}
+## Generated on: {{ ansible_date_time.iso8601 }}
+
+## System Information:
+- Uptime: {{ ansible_facts.uptime_seconds }} seconds
+- OS: {{ ansible_facts.distribution }} {{ ansible_facts.distribution_version }}
+
+## Installed Applications:
+{% if server_role == 'file_server' %}
+- Application: SMB
+{% elif server_role == 'web_server' %}
+- Application: HTTPd
+{% elif server_role == 'data_center' %}
+- Application: PostgreSQL
+{% endif %}
+
+## Notes:
+{% if server_role == 'file_server' %}
+This server is primarily used for file sharing and management.
+{% elif server_role == 'web_server' %}
+This server hosts web applications.
+{% elif server_role == 'data_center' %}
+This server is used for data storage and processing.
+{% endif %}

@@ -1,0 +1,7 @@
+users:
+  - name: hiroshi_protected
+    pass: "{{ hiroshi_pass }}"
+  - name: kento_protected
+    pass: "{{ kento_pass }}"
+  - name: lisa_protected
+    pass: "{{ lisa_pass }}"
