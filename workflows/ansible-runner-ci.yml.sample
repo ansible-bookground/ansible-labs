@@ -1,0 +1,54 @@
+name: Ansible Runner CI #...(1.)
+on: push
+
+jobs:
+  ansible-runner-job: #...(2.)
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code #...(3.)
+      uses: actions/checkout@v4
+
+    - name: Install ansible-runner #...(4.)
+      run: pip install ansible-runner
+
+    - name: Install podman #...(5.)
+      run: sudo apt install podman
+
+    - name: Login quay.io cotaniner registry #...(6.)
+      run: podman login --username ${{ secrets.QUAY_USERNAME }} --password ${{ secrets.QUAY_PASSWORD }} quay.io
+
+    - name: Create Ansible ssh key file #...(7.)
+      run: echo "$SSH_PRIVATE_KEY" > chapter6/CI/project/ssh-key.pem
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_KEYFILE }}
+
+    - name: Change permission #...(8.)
+      run: sudo chmod 600 chapter6/CI/project/ssh-key.pem
+
+    - name: Run Ansible Runner #...(9.)
+      run: (cd chapter6/CI && ansible-runner run --ident my_identifier --process-isolation --container-image ${{ secrets.EE_NAME }} -p apache-deployment-playbook.yml .)
+
+    - name: Check the Ansible runner's result from artifacts/status file #...(10.)
+      run: |
+          RESULT=$(cd chapter6/CI && cat artifacts/my_identifier/status)
+          if [ $RESULT = "successful" ]; then
+          echo "Ansible Runner Job status: success"
+          exit 0
+          else
+          echo "Ansible Runner Job status: failed"
+          exit 1
+          fi
+
+    - name: Verify Web Content #...(11.)
+      run: |
+        URL=${{ secrets.SERVER_URL }}
+        CONTENT=$(curl -s "$URL")
+        EXPECTED_CONTENT="happy automation!"
+        if [ "$CONTENT" = "$EXPECTED_CONTENT" ]; then
+        echo "Success: The web server is the expected one."
+        exit 0
+        else
+        echo "Error: The web server is not the expected one."
+        exit 1
+        fi
