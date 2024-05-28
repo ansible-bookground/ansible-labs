@@ -1,0 +1,10 @@
+---
+- name: Ensure current packages in system are up to date
+  ansible.builtin.dnf:
+    name: '*'
+    state: latest
+
+- name: Install utility tools
+  ansible.builtin.dnf:
+    name: "{{ linux_std_setting_packages }}"
+    state: present

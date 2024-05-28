@@ -1,0 +1,41 @@
+---
+- name: Generate and distribute SSH key to managed nodes
+  hosts: linux_servers
+  gather_facts: true
+  vars:
+    local_base_dir: "/home/vagrant/.ssh"
+
+  tasks:
+    - name: Create .ssh dirctory on ansible controller
+      ansible.builtin.file:
+        state: directory
+        path:  "{{ local_base_dir }}"
+        owner: vagrant
+        mode: '0700'
+      delegate_to: localhost
+      run_once: true
+
+    - name: Generate non-password SSH key pair
+      community.crypto.openssh_keypair:
+        path: "{{ local_base_dir }}/id_rsa_asb"
+        owner: vagrant
+      delegate_to: localhost
+      run_once: true
+      register: _res
+
+    - name: Create ssh_config
+      community.general.ssh_config:
+        user: "vagrant"
+        host: "{{ inventory_hostname }}"
+        hostname: "{{ ansible_facts.eth1.ipv4.address }}"
+        remote_user: "{{ ansible_user }}"
+        identity_file: "{{ local_base_dir }}/id_rsa_asb"
+        state: present
+      delegate_to: localhost
+
+    - name: Register SSH public key to managed nodes
+      ansible.posix.authorized_key:
+        user: "{{ ansible_user }}"
+        state: present
+        key: "{{ _res.public_key }}"
+        

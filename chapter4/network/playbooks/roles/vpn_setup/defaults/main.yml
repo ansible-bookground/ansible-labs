@@ -1,0 +1,16 @@
+---
+# IKE Parameters
+vpn_setup_ike_group: IKEGroup
+vpn_setup_ike_dpd_action: restart
+vpn_setup_ike_dpd_interval: 15
+vpn_setup_ike_dpd_timeout: 30
+vpn_setup_ike_dh_group: 2
+vpn_setup_ike_encryption: aes128
+vpn_setup_ike_hash: sha1
+
+# ESP Parameters
+vpn_setup_esp_group: ESPGroup
+vpn_setup_esp_lifetime: 3600
+vpn_setup_esp_mode: tunnel
+vpn_setup_esp_encryption: aes128
+vpn_setup_esp_hash: sha1

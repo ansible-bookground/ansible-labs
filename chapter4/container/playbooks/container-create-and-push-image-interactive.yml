@@ -1,0 +1,63 @@
+---
+- name: Create Podman Container image
+  hosts: build_env
+  gather_facts: false
+
+  vars:
+    destination_path: /tmp/Containerfile
+    image_name: vim
+    image_tag: latest
+    registry_path: quay.io
+
+  vars_prompt:
+    - name: registry_username
+      prompt: What is your username to login quay.io?
+      private: false
+    - name: registry_password
+      prompt: What is your password to login quay.io?
+      private: true
+    - name: repository_name
+      prompt: What is your repository name?
+      private: false
+    - name: image_tag
+      prompt: What is the name of tag?
+      private: false
+
+  tasks:
+    - name: Create container image
+      block:
+        - name: Copy Containerfile to remote
+          ansible.builtin.copy:
+            src: "{{ playbook_dir }}/files/Containerfile"
+            dest: "{{ destination_path }}"
+
+        - name: Login quay.io
+          containers.podman.podman_login:
+            username: "{{ registry_username }}"
+            password: "{{ registry_password }}"
+            registry: "{{ registry_path }}"
+
+        - name: Create container image from Containerfile and push it
+          containers.podman.podman_image:
+            name: "{{ image_name }}"
+            tag: "{{ image_tag }}"
+            state: build
+            path: /tmp/
+            pull: false
+            build:
+              file: "{{ destination_path }}"
+            push: true
+            push_args:
+              dest: "{{ registry_path }}/{{ repository_name }}/"
+
+      always:
+        - name: Remove Containerfile
+          ansible.builtin.file:
+            path: "{{ destination_path }}"
+            state: absent
+
+        - name: Remove container image
+          containers.podman.podman_image:
+            name: "{{ image_name }}"
+            tag: "{{ image_tag }}"
+            state: absent

@@ -1,0 +1,156 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Before vagrant up with this Vagrantfile,
+# You may need to install 'vagrant-vyos' like following:
+#
+# $ vagrant plugin install vagrant-vyos
+#
+_post_up = <<-SCRIPT
+if [ "$(id -g -n)" != 'vyattacfg' ] ; then
+  exec sg vyattacfg -c "/bin/vbash $(readlink -f $0) $*"
+fi
+POST_UP_IF=$1
+POST_UP_IP=$2
+POST_UP_NM=$3
+POST_UP_HOSTNAME=$4
+echo "[debug] post_up: args -> inteface=${POST_UP_IF}, address=${POST_UP_IP}, netmask=${POST_UP_NM}, hostname=${POST_UP_HOSTNAME}"
+source /opt/vyatta/etc/functions/script-template
+set interfaces ethernet ${POST_UP_IF} address ${POST_UP_IP}/${POST_UP_NM}
+set system static-host-mapping host-name ${POST_UP_HOSTNAME} inet ${POST_UP_IP}
+commit
+save
+SCRIPT
+
+_post_up_ansible = <<-SCRIPT
+for nic in "eth0" "eth1"
+do
+    conn_name=$(nmcli dev show $nic | awk -F: '/^GENERAL.CONNECTION:/ { print $2 }' | sed 's/ *//')
+    nmcli con mod "$conn_name" connection.id $nic
+done
+nmcli con mod eth1 ipv4.address $1/$2
+nmcli con mod eth1 ipv4.method manual
+systemctl restart NetworkManager
+
+dnf groupinstall -y "Development Tools"
+dnf install -y mlocate python3-devel python3-pip tree sshpass libssh-devel
+for user in "ansible" "vagrant"
+do
+  sudo -i -u $user pip3 install --user -r /opt/env/bootstrap/requirements.txt
+done
+SCRIPT
+
+_pre_destroy = <<-SCRIPT
+SCRIPT
+
+Vagrant.configure("2") do |config|
+  config.vm.define "ansible42" do |ansible|
+    IPADDR = "192.168.57.29"
+    PREFIX = "24"
+    VBOXNET = "vboxnet1"
+    ansible.vm.box = "fedora/39-cloud-base"
+    ansible.vm.hostname = "ansible42.example.com"
+    ansible.vm.network "private_network", \
+                        ip: IPADDR, \
+                        netmask: PREFIX, \
+                        virtualbox_innet: VBOXNET, \
+                        auto_config: false
+    ansible.vm.provider "virtualbox" do |vb|
+      vb.memory = "4096"
+      vb.gui = false
+      vb.cpus = 4
+    end
+    ansible.vm.synced_folder "./env", "/opt/env", owner: "root", group: "root"
+    ansible.vm.synced_folder "../playbooks", "/home/vagrant/playbooks", owner: "vagrant", group: "vagrant"
+
+    ansible.trigger.after :up do |trigger|
+      trigger.run_remote = {
+        inline: _post_up_ansible,
+        args: [IPADDR,PREFIX]
+      }
+    end
+
+    ansible.vm.provision "ansible" do |ansible|
+      ansible.verbose = "v"
+      ansible.playbook = "playbook.yml"
+    end
+  end
+
+
+  VYOS_VBOX = "vyos/current"
+  VYOS_VBOX_VERSION = "20240228.16.19"
+  VBOXNET = "vboxnet1"
+  MNG_IF = "eth1"
+
+  config.vm.define "center-router" do |vyos|
+    HOSTNAME = "crt"
+    IPADDR = "192.168.57.21"
+    vyos.vm.box = VYOS_VBOX
+    vyos.vm.box_version = VYOS_VBOX_VERSION
+    vyos.vm.hostname = HOSTNAME
+    vyos.vm.network "private_network", ip: IPADDR, netmask: PREFIX, virtualbox_innet: VBOXNET, auto_config: false
+    vyos.vm.network "private_network", virtualbox__intnet: "wan"
+    vyos.vm.network "private_network", virtualbox__intnet: "datacenter"
+    vyos.vm.provider "virtualbox" do |vb|
+      vb.memory = "2048"
+      vb.gui = false
+      vb.cpus = 2
+    end
+    vyos.ssh.username="vyos"
+    vyos.ssh.password="vyos"
+    vyos.trigger.after :up do |trigger|
+      trigger.run_remote = {
+        inline: _post_up,
+        args: [MNG_IF, IPADDR, PREFIX, HOSTNAME]
+      }
+    end
+  end
+
+  config.vm.define "branch-router01" do |vyos|
+    HOSTNAME = "brt01"
+    IPADDR = "192.168.57.22"
+    vyos.vm.box = VYOS_VBOX
+    vyos.vm.box_version = VYOS_VBOX_VERSION
+    vyos.vm.hostname = HOSTNAME
+    vyos.vm.network "private_network", ip: IPADDR, netmask: PREFIX, virtualbox_innet: VBOXNET, auto_config: false
+    vyos.vm.network "private_network", virtualbox__intnet: "wan"
+    vyos.vm.network "private_network", virtualbox__intnet: "lan01"
+    vyos.vm.provider "virtualbox" do |vb|
+      vb.memory = "2048"
+      vb.gui = false
+      vb.cpus = 2
+    end
+    vyos.ssh.username="vyos"
+    vyos.ssh.password="vyos"
+    vyos.trigger.after :up do |trigger|
+      trigger.run_remote = {
+        inline: _post_up,
+        args: [MNG_IF, IPADDR, PREFIX, HOSTNAME]
+      }
+    end
+  end
+
+  config.vm.define "branch-router02" do |vyos|
+    HOSTNAME = "brt02"
+    IPADDR = "192.168.57.23"
+    vyos.vm.box = VYOS_VBOX
+    vyos.vm.box_version = VYOS_VBOX_VERSION
+    vyos.vm.hostname = HOSTNAME
+    vyos.vm.network "private_network", ip: IPADDR, netmask: PREFIX, virtualbox_innet: VBOXNET, auto_config: false
+    vyos.vm.network "private_network", virtualbox__intnet: "wan"
+    vyos.vm.network "private_network", virtualbox__intnet: "lan02"
+    vyos.vm.provider "virtualbox" do |vb|
+      vb.memory = "2048"
+      vb.gui = false
+      vb.cpus = 2
+    end
+    vyos.ssh.username="vyos"
+    vyos.ssh.password="vyos"
+    vyos.trigger.after :up do |trigger|
+      trigger.run_remote = {
+        inline: _post_up,
+        args: [MNG_IF, IPADDR, PREFIX, HOSTNAME]
+      }
+    end
+  end
+end

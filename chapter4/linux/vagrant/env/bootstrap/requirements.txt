@@ -1,0 +1,9 @@
+ansible==9.2.0
+ansible-builder==3.0.0
+ansible-compat==4.1.11
+ansible-core==2.16.3
+ansible-lint==24.2.0
+ansible-navigator==24.2.0
+ansible-runner==2.3.5
+molecule==24.2.0
+paramiko==3.4.0

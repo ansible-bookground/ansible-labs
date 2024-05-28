@@ -1,0 +1,9 @@
+---
+- name: Test if variables are properly formatted
+  ansible.builtin.assert:
+    that:
+      - vpn_setup_router_type in ['center', 'branch']
+      - vpn_setup_center_ipaddr is ansible.utils.ipv4_address
+      - vpn_setup_branch_ipaddr is ansible.utils.ipv4_address
+      - (vpn_setup_branch_id is number) and (1 <= vpn_setup_branch_id)
+      - vpn_setup_backup_dir != ''

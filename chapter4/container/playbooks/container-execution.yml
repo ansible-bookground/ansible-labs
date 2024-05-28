@@ -1,0 +1,19 @@
+---
+- name: Operation Podman Container
+  hosts: execution_env
+  gather_facts: false
+  vars_prompt:
+    - name: command
+      prompt: What do you want to do in container?
+      private: false
+
+  tasks:
+    - name: Exec command in Container
+      containers.podman.podman_container_exec:
+        name: vim_production
+        command: "{{ command }}"
+      register: res
+
+    - name: Debug result of command execution.
+      ansible.builtin.debug:
+        var: res.stdout

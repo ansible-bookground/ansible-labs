@@ -1,0 +1,24 @@
+---
+- hosts: execution_env
+  gather_facts: false
+  vars:
+    destination_path: /opt/
+  become: true
+  tasks:
+    - name: Copy podman-compose.yml
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/files/podman-compose.yml"
+        dest: "{{ destination_path }}"
+
+    - name: Start containers with Podman Compose
+      ansible.builtin.command: podman-compose up -d
+      args:
+        chdir: "{{ destination_path }}"
+
+    - name: Stop containers with Podman Compose
+      ansible.builtin.command: podman-compose down
+      args:
+        chdir: "{{ destination_path }}"
+      tags:
+        - never
+        - destroy

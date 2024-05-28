@@ -1,0 +1,12 @@
+---
+- name: Deploy Podman Container
+  hosts: execution_env
+  gather_facts: false
+
+  tasks:
+    - name: Run Container
+      containers.podman.podman_container:
+        name: vim_production
+        image: quay.io/tono/vim:latest
+        recreate: true
+        command: sleep infinity

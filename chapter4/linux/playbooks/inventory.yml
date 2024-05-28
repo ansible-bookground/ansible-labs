@@ -1,0 +1,9 @@
+---
+linux_servers:
+  vars:
+    ansible_user: ansible
+    ansible_password: "Ansible!123"
+    ansible_become_pass: "Ansible!123"
+  hosts:
+    node01.example.com:
+      ansible_host: 192.168.57.11

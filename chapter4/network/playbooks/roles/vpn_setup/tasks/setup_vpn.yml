@@ -1,0 +1,25 @@
+---
+- name: Ensure backup directory is existing
+  ansible.builtin.file:
+    path: "{{ vpn_setup_backup_dir }}"
+    state: directory
+  delegate_to: localhost
+  run_once: true
+
+- name: Backup config before configuring
+  vyos.vyos.vyos_config:
+    backup: true
+    backup_options:
+      dir_path: "{{ vpn_setup_backup_dir }}"
+      filename: "{{ inventory_hostname }}_before.config"
+
+- name: Configure VPN settings
+  vyos.vyos.vyos_config:
+    src: "{{ vpn_setup_router_type }}_config_template.j2"
+
+- name: Backup config after configuring
+  vyos.vyos.vyos_config:
+    backup: true
+    backup_options:
+      dir_path: "{{ vpn_setup_backup_dir }}"
+      filename: "{{ inventory_hostname }}_after.config"

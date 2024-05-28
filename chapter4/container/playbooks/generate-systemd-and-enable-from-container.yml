@@ -1,0 +1,26 @@
+---
+- hosts: execution_env
+  gather_facts: false
+  tasks:
+    - name: Start alpine container with a long-running process
+      containers.podman.podman_container:
+        name: alpine_local
+        image: alpine
+        command: sleep infinity
+        state: started
+
+    - name: Generate systemd unit file for alpine container
+      containers.podman.podman_generate_systemd:
+        name: alpine_local
+        new: true
+        no_header: true
+        force: true
+        dest: ~/.config/systemd/user/
+    
+    - name: Ensure alpine container is started and enabled
+      ansible.builtin.systemd:
+        name: container-alpine_local
+        daemon_reload: true
+        state: started
+        enabled: true
+        scope: user

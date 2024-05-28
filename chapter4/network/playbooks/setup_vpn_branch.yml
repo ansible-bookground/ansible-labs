@@ -1,0 +1,13 @@
+---
+- hosts: branch_router
+  gather_facts: false
+  tasks:
+    - name: Setup VPN branch router
+      ansible.builtin.import_role:
+        name: vpn_setup
+      vars:
+        vpn_setup_router_type: branch
+        vpn_setup_center_ipaddr: 192.168.57.21
+        vpn_setup_branch_ipaddr: "{{ branch_router_ipaddr }}"
+        vpn_setup_branch_id: "{{ branch_id }}"
+        vpn_setup_backup_dir: ./backup_config

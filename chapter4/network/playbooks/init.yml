@@ -1,0 +1,45 @@
+---
+- name: Initialize center router
+  hosts: center_router
+  gather_facts: false
+  tasks:
+    - name: Add description to interfaces
+      vyos.vyos.vyos_interfaces:
+        config:
+          - name: eth0
+            description: "NAT segment"
+          - name: eth1
+            description: "WAN segment"
+          - name: eth2
+            description: "Data center segment"
+        state: merged
+
+    - name: Assign ip address for local network
+      vyos.vyos.vyos_l3_interfaces:
+        config:
+          - name: eth2
+            ipv4:
+              - address: 192.168.0.1/24
+
+- name: Initialize branch router
+  hosts: branch_router
+  gather_facts: false
+  tasks:
+    - name: Add description and disable the interface on NAT Segment
+      vyos.vyos.vyos_interfaces:
+        config:
+          - name: eth0
+            description: "NAT Segment (Disabled for the scenario)"
+            enabled: false
+          - name: eth1
+            description: "WAN Segment"
+          - name: eth2
+            description: "LAN Segment"
+        state: merged
+
+    - name: Assign ip address for local network
+      vyos.vyos.vyos_l3_interfaces:
+        config:
+          - name: eth2
+            ipv4:
+              - address: "192.168.{{ branch_id }}.1/24"

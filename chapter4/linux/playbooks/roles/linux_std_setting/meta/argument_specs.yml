@@ -1,0 +1,31 @@
+---
+argument_specs:
+  main:
+    short_description: Main entry point for the linux_std_setting role
+    description:
+      - This is the main entrypoint for the C(linux_std_setting) role.
+    author:
+      - Kiyohiko Nagamine
+    options:
+      linux_std_setting_users:
+        type: list
+        elements: dict
+        required: true
+        options:
+          name:
+            type: str
+            required: true
+          password:
+            type: str
+            required: true
+          uid:
+            type: int
+            required: true
+          enable_sudo:
+            type: bool
+            required: true
+
+      linux_std_setting_packages:
+        type: list
+        required: true
+        elements: str

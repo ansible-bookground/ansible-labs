@@ -1,0 +1,8 @@
+---
+linux_std_setting_packages:
+  - lsof
+  - openscap-scanner
+  - tcpdump
+  - scap-security-guide
+  - sos
+  - strace

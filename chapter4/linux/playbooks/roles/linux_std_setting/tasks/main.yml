@@ -1,0 +1,9 @@
+---
+- name: Package update and install utilities
+  ansible.builtin.include_tasks: package.yml
+
+- name: Security settings
+  ansible.builtin.include_tasks: security.yml
+
+- name: User settings
+  ansible.builtin.include_tasks: user.yml

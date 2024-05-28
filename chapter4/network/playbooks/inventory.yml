@@ -1,0 +1,17 @@
+---
+all:
+  vars:
+    ansible_user: vyos
+    ansible_password: vyos
+    ansible_connection: ansible.netcommon.network_cli
+    ansible_network_os: vyos.vyos.vyos
+center_router:
+  hosts:
+    crt:
+      ansible_host: 192.168.57.21
+branch_router:
+  hosts:
+    brt01:
+      ansible_host: 192.168.57.22
+    brt02:
+      ansible_host: 192.168.57.23

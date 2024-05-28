@@ -1,0 +1,43 @@
+{# Config Template for Center Router #}
+{#
+  Interfaces
+#}
+set interfaces vti vti{{ vpn_setup_branch_id }} address 10.10.{{ vpn_setup_branch_id }}.1/30
+set vpn ipsec interface eth1
+{#
+  IPSec pre shared key
+#}
+set vpn ipsec authentication psk branch{{ vpn_setup_branch_id }} id {{ vpn_setup_center_ipaddr }}
+set vpn ipsec authentication psk branch{{ vpn_setup_branch_id }} id {{ vpn_setup_branch_ipaddr }}
+set vpn ipsec authentication psk branch{{ vpn_setup_branch_id }} secret Branch{{ vpn_setup_branch_id }}PSK
+{#
+  IKE group
+#}
+set vpn ipsec ike-group {{ vpn_setup_ike_group }} dead-peer-detection action '{{ vpn_setup_ike_dpd_action }}'
+set vpn ipsec ike-group {{ vpn_setup_ike_group }} dead-peer-detection interval '{{ vpn_setup_ike_dpd_interval }}'
+set vpn ipsec ike-group {{ vpn_setup_ike_group }} dead-peer-detection timeout '{{ vpn_setup_ike_dpd_timeout }}'
+set vpn ipsec ike-group {{ vpn_setup_ike_group }} proposal 1 dh-group '{{ vpn_setup_ike_dh_group }}'
+set vpn ipsec ike-group {{ vpn_setup_ike_group }} proposal 1 encryption '{{ vpn_setup_ike_encryption }}'
+set vpn ipsec ike-group {{ vpn_setup_ike_group }} proposal 1 hash '{{ vpn_setup_ike_hash }}'
+{#
+  ESP group
+#}
+set vpn ipsec esp-group {{ vpn_setup_esp_group }} lifetime '{{ vpn_setup_esp_lifetime }}'
+set vpn ipsec esp-group {{ vpn_setup_esp_group }} mode '{{ vpn_setup_esp_mode }}'
+set vpn ipsec esp-group {{ vpn_setup_esp_group }} proposal 1 encryption '{{ vpn_setup_esp_encryption }}'
+set vpn ipsec esp-group {{ vpn_setup_esp_group }} proposal 1 hash '{{ vpn_setup_esp_hash }}'
+{#
+  IPSec peer
+#}
+set vpn ipsec site-to-site peer branch{{ vpn_setup_branch_id }} authentication mode pre-shared-secret
+set vpn ipsec site-to-site peer branch{{ vpn_setup_branch_id }} authentication local-id {{ vpn_setup_center_ipaddr }}
+set vpn ipsec site-to-site peer branch{{ vpn_setup_branch_id }} authentication remote-id {{ vpn_setup_branch_ipaddr }}
+set vpn ipsec site-to-site peer branch{{ vpn_setup_branch_id }} ike-group {{ vpn_setup_ike_group }}
+set vpn ipsec site-to-site peer branch{{ vpn_setup_branch_id }} vti bind vti{{ vpn_setup_branch_id }}
+set vpn ipsec site-to-site peer branch{{ vpn_setup_branch_id }} vti esp-group {{ vpn_setup_esp_group }}
+set vpn ipsec site-to-site peer branch{{ vpn_setup_branch_id }} local-address {{ vpn_setup_center_ipaddr }}
+set vpn ipsec site-to-site peer branch{{ vpn_setup_branch_id }} remote-address {{ vpn_setup_branch_ipaddr }}
+{#
+  Static route
+#}
+set protocols static route 192.168.{{ vpn_setup_branch_id }}.0/24 next-hop 10.10.{{ vpn_setup_branch_id }}.2

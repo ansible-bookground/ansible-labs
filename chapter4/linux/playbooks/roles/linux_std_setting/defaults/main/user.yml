@@ -1,0 +1,18 @@
+---
+linux_std_setting_users:
+  - name: devadmin
+    password: $6$kztDc3XwUZSn6Tck$HcNsSbnugX1rm6BTi/nNk29cqpars4v3oRIETfD96Ppt9j7JLkcUFfKB3wPO2eDIBV2UvqDn8T/ItFd7tm18E0 # DevAdmin!123
+    uid: 1101
+    enable_sudo: true
+  - name: opeadmin
+    password: $6$/8/HMqTz1hr8SLDu$RlbgdkBHeLxeeme9RkKeS24JK1BERVyOOl6.hTFnkiMHDL5BR3nnEu5XCic.egfX74OVo145sb9SjU/re6TSY1 # OpeAdmin!123
+    uid: 1102
+    enable_sudo: true
+  - name: dev
+    password: $6$vC5rPF9aR3R/9aG/$QKe03OiFsURqiM7yJ9n3FD2Efc7TwHPq6iXvrl.fBGMgpt6.CXzdU.GCppAsG83XESXOC48Dqe3FoxI4l00d10 # DevUser!123
+    uid: 1201
+    enable_sudo: false
+  - name: ope
+    password: $6$gGd8jKX1zuDBUQKF$L7iToDu/MrJicAl7/0Vy6kcSjrxIQR5sZQXYPA8lVcsLNR9VhItVp.PpBihhubM210qqknIgrqJkI6K47XdT.0 # OpeUser!123
+    uid: 1202
+    enable_sudo: false

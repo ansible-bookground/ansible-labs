@@ -1,0 +1,14 @@
+---
+galaxy_info:
+  author: Kiyohiko Nagamine
+  description: Configuring VPN settings
+  company: knagmin
+  license: MIT
+  min_ansible_version: "2.16"
+  min_ansible_container_version: ""
+  platforms:
+    - name: Fedora
+      versions:
+        - all
+  galaxy_tags: []
+dependencies: []

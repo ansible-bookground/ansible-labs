@@ -1,0 +1,15 @@
+---
+all:
+  children:
+    container_exec_env:
+      hosts:
+        localhost:
+          ansible_connection: local
+    build_env:
+      hosts:
+        localhost:
+          ansible_connection: local
+    execution_env:
+      hosts:
+        localhost:
+          ansible_connection: local

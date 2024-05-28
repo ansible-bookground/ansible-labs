@@ -1,0 +1,24 @@
+---
+- name: Enable SELinux
+  ansible.posix.selinux:
+    policy: targeted
+    state: enforcing
+
+- name: Set password policy
+  ansible.builtin.copy:
+    src: security/10-std-password-policy.conf
+    dest: /etc/security/pwquality.conf.d/10-std-password-policy.conf
+    owner: root
+    mode: '644'
+
+- name: Configure sshd standard settings
+  ansible.builtin.copy:
+    src: security/10-std-sshd_config.conf
+    dest: /etc/ssh/sshd_config.d/10-std-sshd_config.conf
+    owner: root
+    mode: '600'
+
+- name: Reload sshd
+  ansible.builtin.systemd_service:
+    name: sshd
+    state: reloaded

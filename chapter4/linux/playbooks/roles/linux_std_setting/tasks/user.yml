@@ -1,0 +1,19 @@
+---
+- name: Create user *WITH* admin privilege
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    password: "{{ item.password }}"
+    uid: "{{ item.uid }}"
+    groups: wheel
+    state: present
+  when: item.enable_sudo
+  loop: "{{  linux_std_setting_users }}"
+
+- name: Create user *WITHOUT* admin privilege
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    password: "{{ item.password }}"
+    uid: "{{ item.uid }}"
+    state: present
+  when: not item.enable_sudo
+  loop: "{{  linux_std_setting_users }}"

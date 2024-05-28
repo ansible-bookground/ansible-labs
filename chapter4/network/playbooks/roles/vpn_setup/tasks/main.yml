@@ -1,0 +1,7 @@
+---
+- name: Check input variables
+  ansible.builtin.import_tasks: pre_check.yml
+
+- name: Configure VPN settings
+  ansible.builtin.import_tasks: setup_vpn.yml
+

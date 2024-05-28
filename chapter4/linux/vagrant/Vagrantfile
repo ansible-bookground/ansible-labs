@@ -1,0 +1,48 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+_post_up_managed_node = <<-SCRIPT
+for nic in "eth0" "eth1"
+do
+    conn_name=$(nmcli dev show $nic | awk -F: '/^GENERAL.CONNECTION:/ { print $2 }' | sed 's/ *//')
+    nmcli con mod "$conn_name" connection.id $nic
+done
+nmcli con mod eth1 ipv4.address $1/$2
+nmcli con mod eth1 ipv4.method manual
+systemctl restart NetworkManager
+
+dnf install -y python3-pip
+pip3 install --user ansible-core
+ansible-playbook /opt/env/playbook.yml
+
+SCRIPT
+
+Vagrant.configure("2") do |config|
+  config.vm.define "node01" do |ansible|
+    IPADDR = "192.168.57.11"
+    PREFIX = "24"
+    VBOXNET = "vboxnet1"
+    ansible.vm.box = "fedora/39-cloud-base"
+    ansible.vm.hostname = "node01.example.com"
+    ansible.vm.network "private_network", \
+                        ip: IPADDR, \
+                        netmask: PREFIX, \
+                        virtualbox_innet: VBOXNET, \
+                        auto_config: false
+
+    ansible.vm.provider "virtualbox" do |vb|
+      vb.memory = "4096"
+      vb.gui = false
+      vb.cpus = 4
+    end
+
+    ansible.vm.synced_folder "./env", "/opt/env", owner: "root", group: "root"
+
+    ansible.trigger.after :up do |trigger|
+      trigger.run_remote = {
+        inline: _post_up_managed_node,
+        args: [IPADDR,PREFIX]
+      }
+    end
+  end
+end
