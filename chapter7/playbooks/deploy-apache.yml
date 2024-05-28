@@ -1,0 +1,7 @@
+- hosts: all
+  become: yes
+  tasks:
+    - name: Restart httpd to make sure apply the latest version
+      ansible.builtin.systemd_service:
+        state: restarted
+        name: httpd
