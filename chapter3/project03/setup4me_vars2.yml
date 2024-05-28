@@ -1,0 +1,28 @@
+---
+- name: Setup an user, install and configure a package
+  hosts: web_servers
+  become: true
+  tasks:
+    - name: Ensure user {{ user }} exists
+      user:
+        name: "{{ user }}"
+        state: present
+
+    - name: Ensure sudo privileges are granted to {{ user }} without password
+      lineinfile:
+        path: /etc/sudoers.d/{{ user }}
+        line: '{{ user }} ALL=(ALL) NOPASSWD: ALL'
+        create: true
+        validate: '/usr/sbin/visudo -cf %s'
+
+    - name: Ensure {{ package }} package is installed
+      package:
+        name: "{{ package }}"
+        state: present
+
+    - name: Ensure {{ service }} is running and enabled
+      service:
+        name: "{{ service }}"
+        state: started
+        enabled: true
+

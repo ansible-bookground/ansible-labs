@@ -1,0 +1,9 @@
+---
+- name: Check OS and Distribution
+  hosts: node00.example.com
+  tasks:
+    - name: Show OS info
+      debug:
+        msg: |
+          Yes, that's right. You're running
+          {{ ansible_facts['os_family'] }} / {{ ansible_facts['distribution'] }}

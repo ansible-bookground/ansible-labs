@@ -1,0 +1,36 @@
+---
+- name: Demonstrate block, rescue, always in Ansible
+  hosts: node01.example.com
+  tasks:
+    - name: Attempt to create a file in /root without sufficient privileges
+      block:
+        - name: Try to create a file without become
+          copy:
+            content: "Sample text content"
+            dest: "/root/sample.txt"
+          register: file_creation_result
+          ignore_errors: true
+
+      rescue:
+        - name: Handle failure
+          debug:
+            msg: "Failed to create file as non-privileged user. Error: {{ file_creation_result.msg }}"
+
+      always:
+        - name: Output result in all cases
+          debug:
+            msg: "The task result is: {{ file_creation_result }}"
+
+    - name: Now attempt to create a file in /root with elevated privileges
+      block:
+        - name: Try to create file with become
+          become: true
+          copy:
+            content: "Sample text content"
+            dest: "/root/sample.txt"
+          register: file_creation_result
+
+      always:
+        - name: Output result in all cases
+          debug:
+            msg: "The task result with elevated privileges is: {{ file_creation_result }}"

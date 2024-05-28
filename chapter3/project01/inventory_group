@@ -1,0 +1,11 @@
+node00.example.com
+
+[web_server]
+node01.example.com
+
+[datebase]
+node02.example.com
+
+[servers:children]
+webserver
+database

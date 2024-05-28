@@ -1,0 +1,10 @@
+node00.example.com user=kento package=mariadb service=mariadb
+
+[web_servers]
+node01.example.com
+node02.example.com
+
+[web_servers:vars]
+user=hiroshi
+package=httpd
+service=httpd

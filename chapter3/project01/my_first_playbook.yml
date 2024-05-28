@@ -1,0 +1,12 @@
+---
+- name: My First Playbook Ever!
+  hosts: all
+  tasks:
+    - name: Run echo "Hello, Ansible!" in the shell and store the output to shell_output
+      shell: echo 'Hello, Ansible!'
+      register:
+        shell_output
+
+    - name: Display shell_output
+      debug:
+        msg: "{{ shell_output.stdout }}"

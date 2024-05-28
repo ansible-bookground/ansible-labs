@@ -1,0 +1,64 @@
+---
+- name: Setup hiroshi user, install and configure httpd
+  hosts: node02.example.com
+  become: true # すべての操作に権限昇格が必要なため、このplaybookではプレイ規模で権限昇格を指定して問題ない
+  tasks:
+    - name: Ensure user hiroshi exists
+      user:
+        name: hiroshi
+        state: present
+
+    - name: Ensure sudo privileges is granted to hiroshi without password
+      lineinfile:
+        path: /etc/sudoers.d/hiroshi
+        line: 'hiroshi ALL=(ALL) NOPASSWD: ALL'
+        create: true
+        validate: '/usr/sbin/visudo -cf %s'
+
+    - name: Ensure httpd package is installed
+      package:
+        name: httpd
+        state: present
+
+    - name: Ensure httpd is running and enabled
+      service:
+        name: httpd
+        state: started
+        enabled: true
+
+    - name: Ensure document root directory exists and set permissions
+      file:
+        path: "/var/www/html/website"
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+
+    - name: Ensure httpd configuration has new document root, /var/www/html/website
+      lineinfile:
+        path: /etc/httpd/conf/httpd.conf
+        regexp: '^DocumentRoot'
+        line: 'DocumentRoot "/var/www/html/website"'
+
+    - name: Ensure new directory configuration for new document root exists
+      blockinfile:
+        path: /etc/httpd/conf/httpd.conf
+        block: |
+          <Directory "/var/www/html/website">
+              AllowOverride None
+              Require all granted
+              Options Indexes FollowSymLinks
+          </Directory>
+        marker: "# {mark} ANSIBLE MANAGED BLOCK for /website"
+
+    - name: Ensure a simple index.html is in the new document root
+      copy:
+        content: |
+          <html>
+            <head><title>Welcome</title></head>
+            <body><h1>Hello from Hiroshi's HTTP Server</h1></body>
+          </html>
+        dest: "/var/www/html/website/index.html"
+        owner: root
+        group: root
+        mode: '0646'

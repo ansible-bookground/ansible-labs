@@ -1,0 +1,12 @@
+---
+- name: Adding a user based on distribution
+  hosts: node00.example.com
+  vars:
+    username: hiroshi
+  tasks:
+    - name: Add a user, {{ username }}, with '_fed' on Fedora
+      user:
+        name: "{{ username }}_fed"
+        state: present
+      become: true
+      when: ansible_facts['distribution'] == "Fedora"

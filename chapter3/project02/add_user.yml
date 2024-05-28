@@ -1,0 +1,18 @@
+---
+- name: Setup user hiroshi and sudo privileges
+  hosts: web_servers
+  tasks:
+    - name: Ensure user hiroshi exists
+      user:
+        name: hiroshi
+        state: present
+      become: true
+
+- name: Ensure sudo privileges is granted to hiroshi without password
+      lineinfile:
+        path: /etc/sudoers.d/hiroshi
+        line: 'hiroshi ALL=(ALL) NOPASSWD: ALL'
+        create: true
+        validate: '/usr/sbin/visudo -cf %s'
+      become: true
+
