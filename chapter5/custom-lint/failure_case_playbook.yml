@@ -1,0 +1,12 @@
+---
+- name: Failure Case Playbook for DeprecatedVariableRule
+  hosts: localhost
+  tasks:
+    - name: Display a message with deprecated variable syntax
+      debug:
+        msg: "Hello, ${username}!"
+
+    - name: Attempt to use deprecated syntax in a condition
+      when: "${condition_var} == true"
+      debug:
+        msg: "This condition attempts to use the deprecated syntax."

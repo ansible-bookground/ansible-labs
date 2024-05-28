@@ -1,0 +1,15 @@
+---
+- name: Tests uri_checker module.
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Check uri 2 times at 3 second intervals
+      namespace.web.uri_checker:
+        url: https://gogle.com
+        interval: 3
+        count: 2
+      register: res
+
+    - name: Debug result of module execution
+      ansible.builtin.debug:
+        var: res

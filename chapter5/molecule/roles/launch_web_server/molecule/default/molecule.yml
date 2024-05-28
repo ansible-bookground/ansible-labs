@@ -1,0 +1,21 @@
+---
+dependency:
+  name: galaxy
+  options:
+    requirements-file: requirements.yml
+platforms:
+  - name: molecule-centos
+    image: centos:stream8
+driver:
+  options:
+    login_cmd_template: "podman exec -it {instance} bash"
+    ansible_connection_options:
+      ansible_connection: podman
+scenario:
+  test_sequence:
+    - destroy
+    - create
+    - prepare
+    - converge
+    - verify
+    - destroy

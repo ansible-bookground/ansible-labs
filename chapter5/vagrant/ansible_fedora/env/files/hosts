@@ -1,0 +1,12 @@
+127.0.0.1       localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1             localhost localhost.localdomain localhost6 localhost6.localdomain6
+
+192.168.57.3    ansible ansible.example.com
+192.168.57.4    awx awx.example.com
+192.168.57.10   node00 node00.example.com
+192.168.57.11   node01 node01.example.com
+192.168.57.12   node02 node02.example.com
+
+#
+# EOF
+#

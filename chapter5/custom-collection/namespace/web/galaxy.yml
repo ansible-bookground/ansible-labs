@@ -1,0 +1,9 @@
+namespace: namespace
+name: web
+version: 1.0.0
+readme: README.md
+authors:
+- Tempei Ono
+description: your collection description
+license:
+- GPL-2.0-or-later

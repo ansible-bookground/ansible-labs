@@ -1,0 +1,9 @@
+---
+- name: Converge 
+  hosts: molecule-centos
+  gather_facts: false
+  tasks:
+    - name: Include content_placement role
+      ansible.builtin.include_role:
+        name: launch_web_server
+

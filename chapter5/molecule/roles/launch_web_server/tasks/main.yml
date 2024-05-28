@@ -1,0 +1,14 @@
+---
+- name: Install httpd package
+  ansible.builtin.dnf:
+    name: httpd
+    state: present
+
+- name: Launch httpd service
+  ansible.builtin.command: httpd
+
+- name: Deploy Contents
+  ansible.builtin.template:
+    src: index.html.j2
+    dest: /var/www/html/index.html
+    mode: 775

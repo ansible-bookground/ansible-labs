@@ -1,0 +1,15 @@
+---
+- name: Verify content
+  hosts: molecule-centos
+  gather_facts: false
+  tasks:
+    - name: Get contents
+      ansible.builtin.uri:
+        url: http://localhost
+      register: res
+      failed_when: false
+
+    - name: Assert rc
+      ansible.builtin.assert:
+        that: 
+          - res.status == 200
