@@ -8,7 +8,7 @@
         state: present
       become: true
 
-- name: Ensure sudo privileges is granted to hiroshi without password
+    - name: Ensure sudo privileges is granted to hiroshi without password
       lineinfile:
         path: /etc/sudoers.d/hiroshi
         line: 'hiroshi ALL=(ALL) NOPASSWD: ALL'
