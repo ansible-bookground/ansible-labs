@@ -1,5 +1,6 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
+ENV['VAGRANT_DEFAULT_PROVIDER'] = 'virtualbox'
 
 # Before vagrant up with this Vagrantfile,
 # You may need to install 'vagrant-vyos' like following:

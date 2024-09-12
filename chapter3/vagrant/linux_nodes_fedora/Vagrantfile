@@ -1,5 +1,6 @@
-6# -*- mode: ruby -*-
+# -*- mode: ruby -*-
 # vi: set ft=ruby :
+ENV['VAGRANT_DEFAULT_PROVIDER'] = 'virtualbox'
 
 _post_up = <<-SCRIPT
 #!/bin/sh -x
